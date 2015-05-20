@@ -127,7 +127,9 @@ function createTask(grunt) {
       // run the task, and attend to postrun tasks
       var qualified = taskName + ':' + targetName;
       var tasks = [
+        'newer-force:on',
         qualified + (args ? ':' + args : ''),
+        'newer-force:restore',
         'newer-postrun:' + qualified + ':' + id + ':' + options.cache
       ];
       grunt.task.run(tasks);
@@ -188,6 +190,17 @@ module.exports = function(grunt) {
           rimraf(cacheDir, done);
         } else {
           done();
+        }
+      });
+
+  var previousForceState = !!grunt.option('force');
+  grunt.registerTask(
+      'newer-force', internal, function(set) {
+        if (set === 'on') {
+          previousForceState = !!grunt.option('force');
+          grunt.option('force', true);
+        } else if (set === 'restore') {
+          grunt.option('force', previousForceState);
         }
       });
 
